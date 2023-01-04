@@ -1,3 +1,29 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [4.49.3](https://github.com/algolia/instantsearch.js/compare/instantsearch.js@4.49.2...instantsearch.js@4.49.3) (2023-01-03)
+
+
+### Bug Fixes
+
+* simple state mapping `routeToState` function throw an error when state is `null` ([#5177](https://github.com/algolia/instantsearch.js/issues/5177)) ([8e61c4c](https://github.com/algolia/instantsearch.js/commit/8e61c4ca32d8f9649f24721a7c682e517919e55e))
+
+
+
+
+
+## 4.49.2 (2022-12-13)
+
+### Bug Fixes
+
+* **answers:** mark as deprecated ([#5157](https://github.com/algolia/instantsearch.js/pull/5157)) ([d7b62eda](https://github.com/algolia/instantsearch.js/commit/d7b62eda77d894a3677a0967a05a2a357e7e5a94))
+
+
+
+
+
 ## [4.49.1](https://github.com/algolia/instantsearch.js/compare/v4.49.0...v4.49.1) (2022-11-01)
 
 

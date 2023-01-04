@@ -1,8 +1,7 @@
 version: 2
 
 references:
-  workspace_root: &workspace_root
-    ~/instantsearch
+  workspace_root: &workspace_root ~/instantsearch
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
@@ -31,13 +30,14 @@ references:
 defaults: &defaults
   working_directory: ~/instantsearch
   docker:
-    - image: cimg/node:14.17.0
+    - image: cimg/node:14.18.0
 
 workflows:
   version: 2
   ci:
     jobs:
       - build
+      - test metadata
       - lint:
           requires:
             - build
@@ -45,6 +45,9 @@ workflows:
           requires:
             - build
       - legacy algoliasearch:
+          requires:
+            - build
+      - vue v3:
           requires:
             - build
       - examples:
@@ -76,7 +79,6 @@ workflows:
     jobs:
       - prepare release
 
-
 jobs:
   build:
     <<: *defaults
@@ -90,7 +92,7 @@ jobs:
       - run:
           name: Build library
           command: |
-            yarn run build --ignore='example-*'
+            yarn run build:ci
       - run:
           name: Test packages size
           command: yarn run test:size
@@ -103,9 +105,30 @@ jobs:
             - packages/instantsearch.js/es
             - packages/instantsearch.js/cjs
             - packages/instantsearch.js/dist
+            - packages/react-instantsearch/dist
+            - packages/react-instantsearch-core/dist
+            - packages/react-instantsearch-dom/dist
+            - packages/react-instantsearch-dom-maps/dist
+            - packages/react-instantsearch-native/dist
+            - packages/react-instantsearch-hooks/dist
+            - packages/react-instantsearch-hooks-web/dist
+            - packages/react-instantsearch-hooks-server/dist
+            - packages/vue-instantsearch/vue2
+            - packages/vue-instantsearch/vue3
+
+  test metadata:
+    <<: *defaults
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_yarn_version
+      - run:
+          name: Test package versions
+          command: yarn run test:versions
 
   lint:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - *attach_workspace
@@ -135,7 +158,7 @@ jobs:
           name: Type Checking
           command: yarn run type-check:v3
 
-  unit tests:
+  vue v3:
     <<: *defaults
     steps:
       - checkout
@@ -144,8 +167,30 @@ jobs:
       - *restore_yarn_cache
       - *run_yarn_install
       - run:
+          name: Update dependencies
+          command: |
+            yarn run prepare-vue3
+      - run:
+          name: Vue Unit tests
+          command: yarn run jest packages/vue-instantsearch --ci --maxWorkers=4
+      - store_test_results:
+          path: junit/jest/
+      - run:
+          name: Vue 3 Test Exports
+          command: yarn workspace vue-instantsearch run test:exports:vue3
+
+  unit tests:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_yarn_version
+      - *restore_yarn_cache
+      - *run_yarn_install
+      - run:
           name: Unit tests
-          command: yarn run test --maxWorkers=4
+          command: yarn run test:ci
       - store_test_results:
           path: junit/jest/
 
@@ -197,10 +242,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run: *install_yarn_version
-      - restore_cache: *restore_yarn_cache
-      - run: *run_yarn_install
-      - save_cache: *save_yarn_cache
+      - *install_yarn_version
+      - *restore_yarn_cache
+      - *run_yarn_install
       - run:
           name: Prepare a pull request for next release
           command: |

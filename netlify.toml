@@ -1,8 +1,8 @@
 [build]
   command=""" \
-    yarn build --ignore='example-*' && \
+    yarn build:ci && \
     yarn website:storybook && \
-    yarn website:examples --concurrency=1 \
+    yarn website:examples --concurrency=1
     """
   publish="website"
 

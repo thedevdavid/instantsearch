@@ -1,16 +1,13 @@
-/* eslint-disable import/no-commonjs */
-
-const wrapWarningWithDevCheck = require('./scripts/babel/wrap-warning-with-dev-check');
-const extensionResolver = require('./scripts/babel/extension-resolver');
-
-const isCJS = process.env.BABEL_ENV === 'cjs';
-const isES = process.env.BABEL_ENV === 'es';
-const isUMD = process.env.BABEL_ENV === 'umd';
-
-const clean = (x) => x.filter(Boolean);
-
 module.exports = (api) => {
+  const clean = (x) => x.filter(Boolean);
+
   const isTest = api.env('test');
+  const isCJS = api.env('cjs');
+  const isES = api.env('es');
+  const isUMD = api.env('umd');
+  const isRollup = api.env('rollup');
+  const isParcel = api.env('parcel');
+
   const modules = isTest || isCJS ? 'commonjs' : false;
   const targets = {};
 
@@ -22,28 +19,41 @@ module.exports = (api) => {
 
   const testPlugins = [
     '@babel/plugin-proposal-class-properties',
-    wrapWarningWithDevCheck,
+    './scripts/babel/wrap-warning-with-dev-check',
   ];
 
   const buildPlugins = clean([
     '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-transform-react-constant-elements',
+    '@babel/plugin-proposal-private-methods',
+    '@babel/plugin-proposal-private-property-in-object',
+    (isCJS || isES || isUMD || isRollup) &&
+      '@babel/plugin-transform-react-constant-elements',
     'babel-plugin-transform-react-pure-class-to-function',
-    wrapWarningWithDevCheck,
-    ...(isCJS || isES
-      ? [
-          [
-            'inline-replace-variables',
-            {
-              __DEV__: {
-                type: 'node',
-                replacement: "process.env.NODE_ENV === 'development'",
-              },
-            },
-          ],
-          extensionResolver,
-        ]
-      : []),
+    './scripts/babel/wrap-warning-with-dev-check',
+    isRollup && 'babel-plugin-transform-react-remove-prop-types',
+    (isCJS || isES) && [
+      'inline-replace-variables',
+      {
+        __DEV__: {
+          type: 'node',
+          replacement: "process.env.NODE_ENV === 'development'",
+        },
+      },
+    ],
+    isES && [
+      './scripts/babel/extension-resolver',
+      {
+        // For verification, see test/module/packages-are-es-modules.mjs
+        modulesToResolve: [
+          // InstantSearch.js/es is an ES Module, so needs complete paths,
+          'instantsearch.js',
+          // React-DOM also fails if the paths are incomplete
+          'react-dom',
+          // `use-sync-external-store` also fails if the paths are incomplete
+          'use-sync-external-store',
+        ],
+      },
+    ],
     // this plugin is used to test if we need polyfills, not to actually insert them
     // only UMD, since cjs & esm have false positives due to imports
     isUMD && [
@@ -80,18 +90,43 @@ module.exports = (api) => {
   ]);
 
   return {
-    presets: [
-      '@babel/preset-typescript',
-      '@babel/preset-react',
-      [
-        '@babel/preset-env',
-        {
-          modules,
-          targets,
-        },
-      ],
-    ],
+    presets: !isParcel
+      ? [
+          '@babel/preset-typescript',
+          '@babel/preset-react',
+          [
+            '@babel/preset-env',
+            {
+              modules,
+              targets,
+            },
+          ],
+        ]
+      : [],
     plugins: isTest ? testPlugins : buildPlugins,
+    overrides: [
+      {
+        test: 'packages/react-*',
+        plugins: [
+          [
+            '@babel/plugin-transform-runtime',
+            {
+              corejs: false,
+              helpers: true,
+              regenerator: false,
+              useESModules: isES || isRollup,
+            },
+          ],
+        ],
+      },
+      {
+        test: 'packages/react-instantsearch-dom-maps',
+        plugins: clean([
+          '@babel/plugin-syntax-dynamic-import',
+          !isRollup && 'babel-plugin-dynamic-import-node',
+        ]),
+      },
+    ],
     // jsx is transpiled, so the comment should no longer be present in the final files
     shouldPrintComment: (value) => value !== '* @jsx h ',
   };
