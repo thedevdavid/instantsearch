@@ -1,10 +1,10 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import filesize from 'rollup-plugin-filesize';
 import globals from 'rollup-plugin-node-globals';
+import resolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import { uglify } from 'rollup-plugin-uglify';
-import filesize from 'rollup-plugin-filesize';
 
 const clear = (x) => x.filter(Boolean);
 
@@ -16,7 +16,7 @@ const createBanner = (name) =>
 
 const plugins = [
   babel({
-    exclude: ['../../node_modules/**', 'node_modules/**'],
+    exclude: /node_modules|algoliasearch-helper/,
     extensions: ['.js', '.ts', '.tsx'],
     rootMode: 'upward',
     runtimeHelpers: true,
@@ -26,9 +26,16 @@ const plugins = [
     preferBuiltins: false,
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   }),
-  commonjs(),
+  commonjs({
+    namedExports: {
+      '../../node_modules/use-sync-external-store/shim/index.js': [
+        'useSyncExternalStore',
+      ],
+    },
+  }),
   globals(),
   replace({
+    __DEV__: false,
     'process.env.NODE_ENV': JSON.stringify('production'),
   }),
   filesize({

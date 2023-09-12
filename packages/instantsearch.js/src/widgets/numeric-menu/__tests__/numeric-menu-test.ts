@@ -2,25 +2,28 @@
  * @jest-environment jsdom
  */
 
-import type { VNode } from 'preact';
-import { render as preactRender } from 'preact';
-import type defaultTemplates from '../defaultTemplates';
-import numericMenu from '../numeric-menu';
-import type { AlgoliaSearchHelper } from 'algoliasearch-helper';
+import {
+  createSingleSearchResponse,
+  createSearchClient,
+} from '@instantsearch/mocks';
+import { castToJestMock } from '@instantsearch/testutils/castToJestMock';
 import algoliasearchHelper, {
   SearchParameters,
   SearchResults,
 } from 'algoliasearch-helper';
+import { render as preactRender } from 'preact';
 
-import { castToJestMock } from '@instantsearch/testutils/castToJestMock';
 import {
   createRenderOptions,
   createInitOptions,
 } from '../../../../test/createWidget';
-import { createSingleSearchResponse } from '@instantsearch/mocks/createAPIResponse';
-import { createSearchClient } from '@instantsearch/mocks/createSearchClient';
+import numericMenu from '../numeric-menu';
+
 import type { RefinementListProps } from '../../../components/RefinementList/RefinementList';
 import type { NumericMenuConnectorParamsItem } from '../../../connectors/numeric-menu/connectNumericMenu';
+import type defaultTemplates from '../defaultTemplates';
+import type { AlgoliaSearchHelper } from 'algoliasearch-helper';
+import type { VNode } from 'preact';
 
 const render = castToJestMock(preactRender);
 jest.mock('preact', () => {

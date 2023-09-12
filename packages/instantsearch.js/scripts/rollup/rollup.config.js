@@ -1,9 +1,10 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import filesize from 'rollup-plugin-filesize';
+import resolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import { uglify } from 'rollup-plugin-uglify';
-import filesize from 'rollup-plugin-filesize';
+
 import packageJson from '../../package.json';
 
 const version =
@@ -22,7 +23,7 @@ const plugins = [
   }),
   babel({
     rootMode: 'upward',
-    exclude: /node_modules/,
+    exclude: /node_modules|algoliasearch-helper/,
     extensions: ['.js', '.ts', '.tsx'],
   }),
   commonjs(),

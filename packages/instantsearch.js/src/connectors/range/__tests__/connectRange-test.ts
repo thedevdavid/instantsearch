@@ -1,18 +1,22 @@
-import type { AlgoliaSearchHelper } from 'algoliasearch-helper';
+import {
+  createSearchClient,
+  createSingleSearchResponse,
+} from '@instantsearch/mocks';
 import jsHelper, {
   SearchResults,
   SearchParameters,
 } from 'algoliasearch-helper';
-import connectRange from '../connectRange';
+
+import instantsearch from '../../..';
+import { createInstantSearch } from '../../../../test/createInstantSearch';
 import {
   createDisposeOptions,
   createInitOptions,
   createRenderOptions,
 } from '../../../../test/createWidget';
-import { createSearchClient } from '@instantsearch/mocks/createSearchClient';
-import { createSingleSearchResponse } from '@instantsearch/mocks/createAPIResponse';
-import { createInstantSearch } from '../../../../test/createInstantSearch';
-import instantsearch from '../../..';
+import connectRange from '../connectRange';
+
+import type { AlgoliaSearchHelper } from 'algoliasearch-helper';
 
 function createFacetStatsResults({
   helper,

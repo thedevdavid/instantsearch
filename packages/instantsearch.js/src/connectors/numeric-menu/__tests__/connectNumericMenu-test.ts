@@ -2,23 +2,27 @@
  * @jest-environment jsdom
  */
 
+import {
+  createSearchClient,
+  createSingleSearchResponse,
+} from '@instantsearch/mocks';
 import jsHelper, {
   SearchResults,
   SearchParameters,
 } from 'algoliasearch-helper';
-import type {
-  NumericMenuConnectorParamsItem,
-  NumericMenuRenderState,
-  NumericMenuRenderStateItem,
-} from '../connectNumericMenu';
-import connectNumericMenu from '../connectNumericMenu';
-import { createSearchClient } from '@instantsearch/mocks/createSearchClient';
+
 import {
   createDisposeOptions,
   createInitOptions,
   createRenderOptions,
 } from '../../../../test/createWidget';
-import { createSingleSearchResponse } from '@instantsearch/mocks/createAPIResponse';
+import connectNumericMenu from '../connectNumericMenu';
+
+import type {
+  NumericMenuConnectorParamsItem,
+  NumericMenuRenderState,
+  NumericMenuRenderStateItem,
+} from '../connectNumericMenu';
 
 const encodeValue = (
   start: NumericMenuConnectorParamsItem['start'],
